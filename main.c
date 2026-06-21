@@ -35,6 +35,9 @@ int main(){
     float ballYVel = 0.01f;
     float paddleSpeed = 0.1f;
 
+    int score_L = 0;
+    int score_R = 0;
+
     while (!WindowShouldClose())
     {
         
@@ -49,12 +52,14 @@ int main(){
         }
         
         // Establishing Ball Bounds
-        if(ballPos.y < 0){
-            ballPos.y = 0;
+        //  -bottom
+        if(ballPos.y < 0 + radius){
+            ballPos.y = 0 + radius;
             ballYVel = 0 - ballYVel;
         }
-        if(ballPos.y > GetScreenHeight() - ballPos.y){
-            ballPos.y = GetScreenHeight() - ballPos.y;
+        //  -top
+        if(ballPos.y > GetScreenHeight() - radius){
+            ballPos.y = GetScreenHeight() - radius;
             ballYVel = 0 - ballYVel;
         }
         // Establishing Paddle Bounds
@@ -62,7 +67,7 @@ int main(){
         if(paddleL.y < 0) paddleL.y = 0;
         if(paddleL.y > GetScreenHeight() - paddleSize.y) paddleL.y = GetScreenHeight() - paddleSize.y;
         //  -right
-        if(paddleR.y < 0) paddleR_X.y = 0;
+        if(paddleR.y < 0) paddleR.y = 0;
         if(paddleR.y > GetScreenHeight() - paddleSize.y) paddleR.y = GetScreenHeight() - paddleSize.y;
         
         // Paddle Movement
@@ -74,23 +79,35 @@ int main(){
         if(IsKeyDown(KEY_UP)) paddleR.y -= paddleSpeed;
         if(IsKeyDown(KEY_DOWN)) paddleR.y += paddleSpeed;
 
-
-
+        if(ballVel > 0){
+            ballVel += 0.00001f * GetFrameTime();
+        } else if (ballVel < 0){
+            ballVel -= 0.00001f * GetFrameTime();
+        }
 
         BeginDrawing();
         // Drawing
         ClearBackground(BLACK);
 
+        // "SCORE BOARD" - vietnamese guy
+        //  -left
+        DrawText(TextFormat("%i", score_L), screenWidth / 4 * 3, screenHeight / 2 - 32, 64, GRAY);
+        //  -right
+        DrawText(TextFormat("%i", score_R), screenWidth / 4, screenHeight / 2 - 32, 64, GRAY);
+        
+        // DEBUG TEXT
+        DrawText(TextFormat("Ball x speed: %f", ballVel), 20, screenHeight - 20, 10, GRAY);
+        DrawText(TextFormat("Ball y speed: %f", ballYVel), 20, screenHeight - 40, 10, GRAY);
+
+        DrawText(TextFormat("Ball x position: %f", ballPos.x), 20, screenHeight - 80, 10, GRAY);
+        DrawText(TextFormat("Ball y position: %f", ballPos.y), 20, screenHeight - 60, 10, GRAY);
+
+        // SHAPES
         DrawCircleV(ballPos, radius, WHITE);
         DrawRectangleRec(paddleL, WHITE);
         DrawRectangleRec(paddleR, WHITE);
 
         EndDrawing();
-    }
-
-    while(!WindowShouldClose){
-        WaitTime(5.0);
-        ballVel += 0.02f;
     }
 
     CloseWindow();
