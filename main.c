@@ -1,8 +1,18 @@
 #include "raylib.h"
+#include "stdlib.h"
+
+int score_L = 0;
+int score_R = 0;
+
+int screenWidth = 600;
+int screenHeight = 500;
+
+float ballVel = 0.03f;
+float ballYVel = 0.02f;
+ 
+float paddleSpeed = 0.1f;
 
 int main(){
-    int screenWidth = 600;
-    int screenHeight = 500;
 
     Vector2 ballPos = {
         .x = 0.5 * screenWidth,
@@ -30,28 +40,24 @@ int main(){
 
     Rectangle paddleL = {paddleL_X.x, paddleL_X.y, paddleSize.x, paddleSize.y};
     Rectangle paddleR = {paddleR_X.x, paddleR_X.y, paddleSize.x, paddleSize.y};
-
-    float ballVel = 0.03f;
-    float ballYVel = 0.01f;
-    float paddleSpeed = 0.1f;
-
-    int score_L = 0;
-    int score_R = 0;
+    
 
     while (!WindowShouldClose())
     {
-        
-
-
         // Ball movement
         ballPos.x += ballVel;
         ballPos.y += ballYVel;
 
+        // Ball-Paddle Collision detection
         if(CheckCollisionCircleRec(ballPos, radius, paddleL) || CheckCollisionCircleRec(ballPos, radius, paddleR)){
-            ballVel = 0 - ballVel; 
+            if(ballVel < 0){
+                ballVel = 0 - (ballVel - 0.005); 
+                ballYVel -= 0.00025;
+            } else if(ballVel > 0){
+                ballVel = 0 - (ballVel + 0.005);
+                ballYVel += 0.00025;
+            }
         }
-
-
         
         // Establishing Ball Bounds
         //  -bottom
@@ -65,19 +71,22 @@ int main(){
             ballYVel = 0 - ballYVel;
         }
 
+        // Score keeping
         if(ballPos.x <= 0 + radius){
-            score_R += 1;
+            score_R += 1; // a point to the right player
             ballPos.x = 0.5 * screenWidth;
             ballPos.y = 0.5 * screenHeight;
-
-            ballVel = 0 - ballVel;
-
+            
+            ballVel = 0.03f;
+            ballYVel = 0.02f;
+            
         } else if (ballPos.x >= GetScreenWidth() - radius){
-            score_L += 1;
+            score_L += 1; // a point to the left player
             ballPos.x = 0.5 * screenWidth;
             ballPos.y = 0.5 * screenHeight;
-
-            ballVel = 0 - ballVel;  
+            
+            ballVel = -0.03f; 
+            ballYVel = -0.02f;
         }
 
         // Establishing Paddle Bounds
@@ -97,11 +106,7 @@ int main(){
         if(IsKeyDown(KEY_UP)) paddleR.y -= paddleSpeed;
         if(IsKeyDown(KEY_DOWN)) paddleR.y += paddleSpeed;
 
-        if(ballVel > 0){
-            ballVel += 0.00001f * GetFrameTime();
-        } else if (ballVel < 0){
-            ballVel -= 0.00001f * GetFrameTime();
-        }
+
 
         BeginDrawing();
         // Drawing
@@ -109,9 +114,9 @@ int main(){
 
         // "SCORE BOARD" - vietnamese guy
         //  -left
-        DrawText(TextFormat("%i", score_L), screenWidth / 4 * 3, screenHeight / 2 - 32, 64, GRAY);
+        DrawText(TextFormat("%i", score_R), screenWidth / 4 * 3, screenHeight / 2 - 32, 64, GRAY);
         //  -right
-        DrawText(TextFormat("%i", score_R), screenWidth / 4, screenHeight / 2 - 32, 64, GRAY);
+        DrawText(TextFormat("%i", score_L), screenWidth / 4, screenHeight / 2 - 32, 64, GRAY);
         
         // DEBUG TEXT
         DrawText(TextFormat("Ball x speed: %f", ballVel), 20, screenHeight - 20, 10, GRAY);
